@@ -75,15 +75,32 @@
       hits <- hits[!duplicated(hits$queryHits),]
       gr1 <- gr[hits$queryHits]
       gr2 <- gr[-hits$queryHits]
-      GenomicRanges::mcols(gr1)[,"gene"] <- names(ref_sub)[hits$subjectHits]
-      GenomicRanges::mcols(gr2)[,"gene"] <- NA
-      gr <- c(gr1,gr2)
 
-      # hits <- breakTies(hits, method = "first")
-      # hits <- methods::as(hits, "List")
-      # hits <- extractList(names(ref_sub), hits)
-      # hits <- as.character(hits)
-      # mcols(gr)[,"gene"] <- hits
+      if (annotationType == "genes") {
+        GenomicRanges::mcols(gr1)[,"gene"] <- names(ref_sub)[hits$subjectHits]
+        GenomicRanges::mcols(gr2)[,"gene"] <- NA
+      } else if (annotationType == "transcripts") {
+        GenomicRanges::mcols(gr1)[,"transcript"] <- names(ref_sub)[hits$subjectHits]
+        GenomicRanges::mcols(gr2)[,"transcript"] <- NA
+      } else {
+        stop("Invalid annotationType. Must be 'genes' or 'transcripts'.")
+      }
+
+      gr <- c(gr1, gr2)
+      gr <- as.data.frame(gr)
+      gr$dominant_tss <- gr$start
+      colnames(gr)[c(1,7,8)] <- c("chr","start","end")
+
+      # annotationType に基づいて列名を設定
+      if (annotationType == "genes") {
+        colnames(gr)[which(colnames(gr) == "gene")] <- "gene"
+      } else if (annotationType == "transcripts") {
+        colnames(gr)[which(colnames(gr) == "transcript")] <- "transcript"
+      }
+
+      gr <- gr[,c(6,1,7,8,5,ncol(gr),9:(ncol(gr)-1))]
+      setDT(gr)
+      setorder(gr, start)
       #############################################################
 
       if(filterCluster == TRUE){
