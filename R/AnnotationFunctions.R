@@ -59,8 +59,10 @@
         ref_sub[,end:= start + down + up -1]
       }
       if ("gene_id" %in% colnames(ref_sub)) {
+        ref_sub$gene_id[is.na(ref_sub$gene_id)] <- "unknown"
         rownames(ref_sub) <- make.unique(as.character(ref_sub$gene_id))
       } else if ("tx_name" %in% colnames(ref_sub)) {
+        ref_sub$tx_name[is.na(ref_sub$tx_name)] <- "unknown"
         rownames(ref_sub) <- make.unique(as.character(ref_sub$tx_name))
       } else {
         stop("Neither 'gene_id' nor 'tx_name' found in ref_sub")
@@ -88,8 +90,10 @@
         ##find overlap with coding regions
         ##coding
         if ("gene_id" %in% colnames(ref_coding)) {
+          ref_coding$gene_id[is.na(ref_coding$gene_id)] <- "unknown"
           rownames(ref_coding) <- make.unique(as.character(ref_coding$gene_id))
         } else if ("tx_name" %in% colnames(ref_coding)) {
+          ref_coding$tx_name[is.na(ref_coding$tx_name)] <- "unknown"
           rownames(ref_coding) <- make.unique(as.character(ref_coding$tx_name))
         } else {
           stop("Neither 'gene_id' nor 'tx_name' found in ref_coding")
