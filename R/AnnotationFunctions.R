@@ -59,11 +59,11 @@
         ref_sub[,end:= start + down + up -1]
       }
       if ("gene_id" %in% colnames(ref_sub)) {
-        rownames(ref_sub) <- ref_sub$gene_id
+        rownames(ref_sub) <- make.unique(as.character(ref_sub$gene_id))
       } else if ("tx_name" %in% colnames(ref_sub)) {
-        rownames(ref_sub) <- ref_sub$tx_name
+        rownames(ref_sub) <- make.unique(as.character(ref_sub$tx_name))
       } else {
-        stop("Neither 'gene_id' nor 'tx_id' found in ref_sub")
+        stop("Neither 'gene_id' nor 'tx_name' found in ref_sub")
       }
       ref_sub <- makeGRangesFromDataFrame(ref_sub, keep.extra.columns= FALSE)
       ##find overlap with promoter region
@@ -88,9 +88,9 @@
         ##find overlap with coding regions
         ##coding
         if ("gene_id" %in% colnames(ref_coding)) {
-          rownames(ref_coding) <- ref_coding$gene_id
+          rownames(ref_coding) <- make.unique(as.character(ref_coding$gene_id))
         } else if ("tx_name" %in% colnames(ref_coding)) {
-          rownames(ref_coding) <- ref_coding$tx_name
+          rownames(ref_coding) <- make.unique(as.character(ref_coding$tx_name))
         } else {
           stop("Neither 'gene_id' nor 'tx_name' found in ref_coding")
         }
