@@ -58,7 +58,13 @@
         ref_sub[,start:= end- down]##end + 1 -> end April10
         ref_sub[,end:= start + down + up -1]
       }
-      rownames(ref_sub) <- ref_sub$gene_id
+      if ("gene_id" %in% colnames(ref_sub)) {
+        rownames(ref_sub) <- ref_sub$gene_id
+      } else if ("tx_id" %in% colnames(ref_sub)) {
+        rownames(ref_sub) <- ref_sub$tx_id
+      } else {
+        stop("Neither 'gene_id' nor 'tx_id' found in ref_sub")
+      }
       ref_sub <- makeGRangesFromDataFrame(ref_sub, keep.extra.columns= FALSE)
       ##find overlap with promoter region
       hits <- findOverlaps(gr,ref_sub)
