@@ -60,8 +60,8 @@
       }
       if ("gene_id" %in% colnames(ref_sub)) {
         rownames(ref_sub) <- ref_sub$gene_id
-      } else if ("tx_id" %in% colnames(ref_sub)) {
-        rownames(ref_sub) <- ref_sub$tx_id
+      } else if ("tx_name" %in% colnames(ref_sub)) {
+        rownames(ref_sub) <- ref_sub$tx_name
       } else {
         stop("Neither 'gene_id' nor 'tx_id' found in ref_sub")
       }
@@ -87,7 +87,13 @@
       if(filterCluster == TRUE){
         ##find overlap with coding regions
         ##coding
-        rownames(ref_coding) <- ref_coding$gene_id
+        if ("gene_id" %in% colnames(ref_coding)) {
+          rownames(ref_coding) <- ref_coding$gene_id
+        } else if ("tx_name" %in% colnames(ref_coding)) {
+          rownames(ref_coding) <- ref_coding$tx_name
+        } else {
+          stop("Neither 'gene_id' nor 'tx_name' found in ref_coding")
+        }
         setorder(ref_coding,start)
         ref_coding <- makeGRangesFromDataFrame(ref_coding, keep.extra.columns = FALSE)
         hits <- findOverlaps(gr,ref_coding)
