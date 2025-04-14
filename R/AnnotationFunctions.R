@@ -59,10 +59,8 @@
         ref_sub[,end:= start + down + up -1]
       }
       if ("gene_id" %in% colnames(ref_sub)) {
-        ref_sub$gene_id[is.na(ref_sub$gene_id)] <- "unknown"
         rownames(ref_sub) <- make.unique(as.character(ref_sub$gene_id))
       } else if ("tx_name" %in% colnames(ref_sub)) {
-        ref_sub$tx_name[is.na(ref_sub$tx_name)] <- "unknown"
         rownames(ref_sub) <- make.unique(as.character(ref_sub$tx_name))
       } else {
         stop("Neither 'gene_id' nor 'tx_name' found in ref_sub")
@@ -75,42 +73,23 @@
       hits <- hits[!duplicated(hits$queryHits),]
       gr1 <- gr[hits$queryHits]
       gr2 <- gr[-hits$queryHits]
+      GenomicRanges::mcols(gr1)[,"gene"] <- names(ref_sub)[hits$subjectHits]
+      GenomicRanges::mcols(gr2)[,"gene"] <- NA
+      gr <- c(gr1,gr2)
 
-      if (annotationType == "genes") {
-        GenomicRanges::mcols(gr1)[,"gene"] <- names(ref_sub)[hits$subjectHits]
-        GenomicRanges::mcols(gr2)[,"gene"] <- NA
-      } else if (annotationType == "transcripts") {
-        GenomicRanges::mcols(gr1)[,"transcript"] <- names(ref_sub)[hits$subjectHits]
-        GenomicRanges::mcols(gr2)[,"transcript"] <- NA
-      } else {
-        stop("Invalid annotationType. Must be 'genes' or 'transcripts'.")
-      }
-
-      gr <- c(gr1, gr2)
-      gr <- as.data.frame(gr)
-      gr$dominant_tss <- gr$start
-      colnames(gr)[c(1,7,8)] <- c("chr","start","end")
-
-      # annotationType に基づいて列名を設定
-      if (annotationType == "genes") {
-        colnames(gr)[which(colnames(gr) == "gene")] <- "gene"
-      } else if (annotationType == "transcripts") {
-        colnames(gr)[which(colnames(gr) == "transcript")] <- "transcript"
-      }
-
-      gr <- gr[,c(6,1,7,8,5,ncol(gr),9:(ncol(gr)-1))]
-      setDT(gr)
-      setorder(gr, start)
+      # hits <- breakTies(hits, method = "first")
+      # hits <- methods::as(hits, "List")
+      # hits <- extractList(names(ref_sub), hits)
+      # hits <- as.character(hits)
+      # mcols(gr)[,"gene"] <- hits
       #############################################################
 
       if(filterCluster == TRUE){
         ##find overlap with coding regions
         ##coding
         if ("gene_id" %in% colnames(ref_coding)) {
-          ref_coding$gene_id[is.na(ref_coding$gene_id)] <- "unknown"
           rownames(ref_coding) <- make.unique(as.character(ref_coding$gene_id))
         } else if ("tx_name" %in% colnames(ref_coding)) {
-          ref_coding$tx_name[is.na(ref_coding$tx_name)] <- "unknown"
           rownames(ref_coding) <- make.unique(as.character(ref_coding$tx_name))
         } else {
           stop("Neither 'gene_id' nor 'tx_name' found in ref_coding")
